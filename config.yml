@@ -7,7 +7,7 @@ ami_client:
 
 # General config
 general:
-  log_level: "DEBUG"
+  log_level: "INFO"
   login_validation_timeout: 10
   response_timeout: 10
   ping_timeout: 20
