@@ -1,0 +1,22 @@
+name: test
+
+on: [pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: test
+    steps:
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip3 install --upgrade pip
+          python -m pip3 install poetry
+          poetry install
+
+      - name: Run tests
+        run: poetry run python -m unittest -v test/test*.py
