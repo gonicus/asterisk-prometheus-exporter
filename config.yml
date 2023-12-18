@@ -1,0 +1,98 @@
+# Base exporter config
+ami_client:
+  ip: "<ip>"
+  port: 5038
+  username: '<username>'
+  secret: '<secret>'
+
+# General config
+general:
+  log_level: "DEBUG"
+  login_validation_timeout: 10
+  response_timeout: 10
+  ping_timeout: 20
+
+
+# Default settings
+default:
+  scrape_interval: 15
+  action_response_timeout: 5
+  action_event_timeout: 15
+  action_priority: 1
+  action_context: "default"
+  action_caller_id: "python"
+
+# Filter config
+filter:
+  - event: "RTCPSend|RTCPReceived"
+    metrics:
+      - name: "rtcp_endpoint_x_fraction_lost"
+        description: "Aggregate fraction lost of RTCP events"
+        value:
+          type: counter
+          increment_value: "$Report0FractionLost"
+        labels:
+          - name: "endpoint"
+            value: "$CallerIDNum"
+      - name: "rtcp_endpoint_x_cumulative_lost"
+        description: "Aggregate cumulative lost of RTCP events"
+        value:
+          type: counter
+          increment_value: "$Report0CumulativeLost"
+        labels:
+          - name: "endpoint"
+            value: "$CallerIDNum"
+
+# Action config
+scrape:
+  interval: 15
+  actions:
+    - name: "QueueStatus"
+      collect:
+        - event: "QueueParams"
+          metrics:
+            - name: "queue_total"
+              description: "Available queues"
+              value:
+                type: gauge
+                set_value: "1"
+              labels:
+                - name: "queue"
+                  value: "$Queue"
+        - event: "QueueMember"
+          metrics:
+            - name: "queue_member_count"
+              description: "Number of members currently logged into a specific queue"
+              value:
+                type: gauge
+                increment_value: "1"
+                value_on_scrape_start: 0
+              labels:
+                - name: "queue"
+                  value: "$Queue"
+        - event: "QueueEntry"
+          metrics:
+            - name: "queue_entry_count"
+              description: "Number of entries in a specific queue"
+              value:
+                type: gauge
+                increment_value: "1"
+                value_on_scrape_start: 0
+              labels:
+                - name: "queue"
+                  value: "$Queue"
+      until: "QueueStatusComplete"
+    - name: "PJSIPShowRegistrationInboundContactStatuses"
+      collect:
+        - event: "ContactStatusDetail"
+          metrics:
+            - name: "user_agents"
+              description: "User agents"
+              value:
+                type: gauge
+                increment_value: "1"
+                value_on_scrape_start: 0
+              labels:
+                - name: "user_agent"
+                  value: "$UserAgent"
+      until: "ContactStatusDetailComplete"

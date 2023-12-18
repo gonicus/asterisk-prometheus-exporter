@@ -1,0 +1,279 @@
+type: object
+properties:
+  # AMI client config
+  ami_client:
+    type: object
+    description: Contains configuration values for the AMI Client.
+    properties:
+      ip:
+        type: string
+        description: IP address of the AMI.
+      port:
+        type: integer
+        description: Port of the AMI.
+      username:
+        type: string
+        description: User to authenticate to the AMI.
+      secret:
+        type: string
+        description: Secret to authenticate to the AMI.
+    required:
+      - ip
+      - port
+      - username
+      - secret
+
+  # Exporter general config
+  general:
+    type: object
+    description: Contains basic configuration values of the exporter.
+    properties:
+      log_level:
+        type: string
+        enum:
+          - CRITICAL
+          - ERROR
+          - WARNING
+          - INFO
+          - DEBUG
+          - NOTSET
+        description: Sets the root log level for the exporter.
+        default: "INFO"
+      login_validation_timeout:
+        type: integer
+        description: |
+          How long to wait for the SuccessfulAuth event before aborting the login and terminating the exporter.
+        default: 10
+      response_timeout:
+        type: integer
+        description: |
+          How long to wait for a response from the AMI after sending an action before aborting the attempt.
+          Currently this only effects the response of the login action, since the timeout for each action is
+          set in the scrape action.
+        default: 10
+      ping_timeout:
+        type: integer
+        description: |
+          Sets the timeout after which a ping is sent to the AMI if no more events have been received from the AMI.
+          If there is no answer to the ping, an attempt is made to restart the connection.
+          If the attempt fails, the exporter is terminated.
+        default: 120
+
+  # Default config
+  default_config:
+    type: object
+    description: Contains default values for other configuration values in this file.
+    properties:
+      scrape_interval:
+        type: integer
+        description: Sets the default interval in the scrape section.
+        default: 10
+      action_response_timeout:
+        type: integer
+        description: Sets the default response_timeout of an action in the scrape section.
+        default: 5
+      action_event_timeout:
+        type: integer
+        description: Sets the default event_timeout of an action in the scrape section.
+        default: 10
+      action_priority:
+        type: integer
+        description: Sets the default action_priority of an action in the scrape section.
+        default: 1
+      action_context:
+        type: string
+        description: Sets the default action_context of an action in the scrape section.
+        default: "default"
+      action_caller_id:
+        type: string
+        description: Sets the default action_caller_id of an action in the scrape section.
+        default: "python"
+
+  # Filter config
+  filter:
+    type: array
+    description: |
+      Sets an array of event filters that are added to the EventListener at exporter startup.
+      These are used to filter events that are sent from the AMI to the client (the exporter) in the event of
+      changes within the Asterisk.
+    items:
+      type: object
+      $ref: '#/$def/event_template'
+
+  # Scrape config
+  scrape:
+    type: object
+    descriptions: |
+      Defines actions that are sent to the AMI in a loop and which events are collected after an action is sent
+    properties:
+      interval:
+        description: |
+          Sets a timeout to wait when all actions of a scrape process are finished before starting a new scrape process.
+        type: integer
+      actions:
+        type: array
+        items:
+          description: Defines the list of actions that are send to the AMI.
+          type: object
+          $ref: '#/$def/action_template'
+
+required:
+  - ami_client
+
+## DEFINITIONS ##
+$def:
+  action_template:
+    type: object
+    properties:
+      name:
+        description: |
+          Sets the name of the action that is sent to the AMI. The name must be a validated one
+          that is available and executable in the Asterisk instance.
+        type: string
+      collect:
+        type: array
+        description: |
+          Defines a list of events that are filtered after sending the action until the 'until' event is reached.
+        items:
+          type: object
+          $ref: '#/$def/event_template'
+      until:
+        type: string
+        description: |
+          Sets the finish event sent by Asterisk when all response events of an action have been sent.
+          If this event is reached, the action counts as completed and all data is collected.
+          An example would be the QueueStatusComplete Event from the QueueStatus action.
+      response_timeout:
+        type: integer
+        description: |
+          Sets the timeout for how long to wait for the response after sending the action.
+      event_timeout:
+        type: integer
+        description: |
+          Set a timeout when canceling the action if the 'until' event is not reached.
+      action_priority:
+        type: string
+        description: Sets the Priority sent to the AMI.
+      action_context:
+        type: string
+        description: Sets the Context sent to the AMI.
+      action_caller_id:
+        type: string
+        description: Sets the CallerID sent to the AMI.
+    required:
+      - name
+      - until
+
+  event_template:
+    type: object
+    properties:
+      event:
+        type: string
+        description: |
+          The name of the event to filter. If several events are to be filtered,
+          they can be separated with a |.
+          Example:
+          "RTCPReceived|RTCPSend" -> Either an RTCPReceived event or an RTCPSend event is filtered.
+      metrics:
+        type: array
+        description: Sets a list of metrics that are created based on the values of the filtered event.
+        items:
+          type: object
+          $ref: '#/$def/metric_template'
+    required:
+      - event
+
+  metric_template:
+    type: object
+    properties:
+      name:
+        type: string
+        description: |
+          Sets the name of the metric. The name has to be unique in the entire config, otherwise an error is thrown.
+      description:
+        type: string
+        description: Sets the description of the metric.
+      value:
+        type: object
+        description: Sets the value of the metric, what type it is and how the value changes.
+        oneOf:
+          - $ref: '#/$def/value_type_counter'
+          - $ref: '#/$def/value_type_gauge'
+      labels:
+        type: array
+        description: Sets a list of labels to be created for the metric.
+        items:
+          type: object
+          $ref: "#/$def/label_template"
+    required:
+      - name
+      - description
+      - value
+
+  label_template:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Sets the name of the label. The name must be unique for the metric.
+      value:
+        type: string
+        description: |
+          Sets the value of the label. If this is to be generated dynamically, an attribute from the
+          filtered event can be specified with a $. This attribute is then resolved and used as the value.
+          For example:
+          "$Queue" -> the value of the attribute "Queue" from the filtered event is used.
+    required:
+      - name
+      - value
+
+  # Event value types
+  value_type_counter:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Sets the type of metric.
+        enum: counter
+      increment_value:
+        type: string
+        description: |
+          Determines by how much the value of the metric is incremented when an event is filtered.
+          If this is to be generated dynamically, an attribute from the
+          filtered event can be specified with a $. This attribute is then resolved and used as the value.
+          For example:
+          "$Report0FractionLost" -> the value of the attribute "Report0FractionLost" from the filtered event is used.
+          The specified or evaluated value must be able to be converted to a float
+        default: "1"
+    required:
+      - type
+      - increment_value
+
+  value_type_gauge:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Sets the type of metric.
+        enum: gauge
+      set_value:
+        type: string
+        description: |
+          Sets the value to which the metric is set when an event is received. $ can be used to dynamically
+          set the value based on an attribute of the filtered event.
+          The specified or evaluated value must be able to be converted to a float
+      increment_value:
+        type: string
+        description: |
+          Determines by how much the value of the metric is incremented when an event is filtered.
+          $ can be used to dynamically set the value based on an attribute of the filtered event.
+          The specified or evaluated value must be able to be converted to a float
+      value_on_scrape_start:
+        type: number
+        description: |
+          Sets a value to which the metric will be set when starting a scrape process.
+          This is used, for example, to be able to count how many events were received on an action.
+          If the value is then not reset to 0, the count is simply further aggregated with each action.
+          This would lead to an incorrect count.
+    required:
+      - type
