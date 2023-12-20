@@ -1,8 +1,8 @@
 import unittest
 from dataclasses import dataclass
 from typing import Dict, Any, Sequence, List
-from metric_values import MetricValue, MetricValueCounter, MetricValueGauge
-from prometheus_client import Counter, Gauge
+from metric_values import MetricValueCounter, MetricValueGauge
+from prometheus_client import Gauge
 
 
 @dataclass
@@ -21,7 +21,7 @@ class CounterMock():
         self.last_inc = val
 
     def labels(self, **labelkwargs: Any):
-        label_values = tuple(str(labelkwargs[l]) for l in self.__label_names)
+        label_values = tuple(str(labelkwargs[label]) for label in self.__label_names)
 
         if label_values in self.child_counters:
             return self.child_counters[label_values]
@@ -45,7 +45,7 @@ class GaugeMock():
         self.last_inc = val
 
     def labels(self, **labelkwargs: Any):
-        label_values = tuple(str(labelkwargs[l]) for l in self.__label_names)
+        label_values = tuple(str(labelkwargs[label]) for label in self.__label_names)
 
         if label_values in self.child_gauges:
             return self.child_gauges[label_values]
