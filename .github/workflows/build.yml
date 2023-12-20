@@ -1,7 +1,10 @@
 
 name: Create and publish a Docker image to GitHub packages
 
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
 
 env:
   REGISTRY: ghcr.io
@@ -37,5 +40,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          # tags: ${{ steps.meta.outputs.tags }}  add back when job is executed when a tag is pushed
+          tags: ${{ steps.meta.outputs.tags }}
