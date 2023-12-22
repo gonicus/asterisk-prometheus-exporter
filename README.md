@@ -21,16 +21,13 @@ A different port can be specified via the first positional argument: `poetry run
 A different configuration can be set using the `--config` option: `poetry run python src/main.py --config path/to/config.yml`.
 
 ### Docker
-Create a Docker image using the provided Dockerfile:
-```
-docker build --tag asterisk-prometheus-exporter .
-```
-
+You can use the provided Docker image from GitHub Packages. \
 Run the Docker image and mount the configuration:
 ```
-docker run -p 8080:8080 -v ./config.yml:/home/dev/asterisk-prometheus-exporter/config.yml asterisk-prometheus-exporter
+docker run -p 8080:8080 -v ./config.yml:/home/dev/asterisk-prometheus-exporter/config.yml ghcr.io/gonicus/asterisk-prometheus-exporter:latest
 ```
-The configured metrics can be accessed at http://localhost:8080.
+The configured metrics can be accessed at http://localhost:8080. \
+Alternatively, you can also create a Docker image using the provided Dockerfile.
 
 ## Configuration
 This section shows the rough structure of the configuration. See `src/config_schema.yml` for a detailed description of the configuration and what is possible.
