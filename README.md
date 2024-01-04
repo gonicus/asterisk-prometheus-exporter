@@ -78,7 +78,7 @@ scrape:
               labels:
                 - name: "queue"
                   value: "$Queue"  # Use '$' to access attributes from the filtered event
-      until: "ContactStatusDetailComplete"
+      until: "QueueStatusComplete"
 ```
 
 ## Example configuration
