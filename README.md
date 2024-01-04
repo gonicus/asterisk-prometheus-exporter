@@ -2,6 +2,15 @@
 Repository that provides a dynamically configurable Prometheus exporter for Asterisk. The exporter uses the Asterisk Manager Interface (AMI) to communicate with Asterisk and YAML files to configure what data is scraped from Asterisk and what metrics are generated. This allows the exporter to be used with older Asterisk versions in different environments.
 
 ## Installation
+### Docker
+You can use the provided Docker image from GitHub Packages. \
+Run the Docker image and mount the configuration:
+```
+docker run -p 8080:8080 -v ./config.yml:/home/dev/asterisk-prometheus-exporter/config.yml ghcr.io/gonicus/asterisk-prometheus-exporter:latest
+```
+The configured metrics can be accessed at http://localhost:8080. \
+Alternatively, you can also create a Docker image using the provided Dockerfile.
+
 ### Python Poetry
 The exporter uses Poetry as it's dependency management. Head over to [Poetry](https://python-poetry.org/) to install the latest version for your desired platform.
 
@@ -19,18 +28,6 @@ The configured metrics can be accessed at http://localhost:8080.
 By default, the exporter loads the configuration `config.yml` and uses port 8080. \
 A different port can be specified via the first positional argument: `poetry run python src/main.py 9090`. \
 A different configuration can be set using the `--config` option: `poetry run python src/main.py --config path/to/config.yml`.
-
-### Docker
-Create a Docker image using the provided Dockerfile:
-```
-docker build --tag asterisk-prometheus-exporter .
-```
-
-Run the Docker image and mount the configuration:
-```
-docker run -p 8080:8080 -v ./config.yml:/home/dev/asterisk-prometheus-exporter/config.yml asterisk-prometheus-exporter
-```
-The configured metrics can be accessed at http://localhost:8080.
 
 ## Configuration
 This section shows the rough structure of the configuration. See `src/config_schema.yml` for a detailed description of the configuration and what is possible.
