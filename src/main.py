@@ -13,7 +13,8 @@ def __login(ami_client: ClientWrapper) -> None:
     ami_client.login(
         config.ami_client_config.username,
         config.ami_client_config.secret,
-        config.general_config.login_validation_timeout)
+        config.general_config.login_validation_timeout,
+        config.general_config.fully_booted_validation_timeout)
 
 
 def __shutdown(ami_client: ClientWrapper) -> None:
