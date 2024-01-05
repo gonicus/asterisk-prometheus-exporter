@@ -8,6 +8,7 @@ import config
 from action import ActionExecuter
 from version import __version__
 
+
 def __login(ami_client: ClientWrapper) -> None:
     """Log in to the AMIClient with the credentials from the config."""
     ami_client.login(
