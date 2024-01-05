@@ -44,6 +44,12 @@ properties:
         description: |
           How long to wait for the SuccessfulAuth event before aborting the login and terminating the exporter.
         default: 10
+      fully_booted_validation_timeout:
+        type: integer
+        description: |
+          How long to wait for the FullyBooted event before aborting the login and terminating the exporter.
+          The FullyBooted event is raised when all Asterisk initialization procedures have finished.
+        default: 60
       response_timeout:
         type: integer
         description: |
