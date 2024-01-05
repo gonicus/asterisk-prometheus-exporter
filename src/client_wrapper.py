@@ -97,7 +97,7 @@ class ClientWrapper:
                     f"Unable to login AMI client: reached timeout of {login_timeout}s when validating login")
             if not self.__is_asterisk_fully_booted and time() > start_time + fully_booted_timeout:
                 self.__raise_critical(f"Unable to login AMI client: reached timeout of {fully_booted_timeout}s when "
-                                       "validating that Asterisk is fully booted")
+                                      "validating that Asterisk is fully booted")
 
             sleep(self.__wait_sequence_timeout)
 
