@@ -2,13 +2,17 @@
 
 [[package]]
 name = "asterisk-ami"
-version = "0.1.6"
+version = "0.1.7"
 description = "Python AMI Client"
 optional = false
 python-versions = "*"
 files = [
-    {file = "asterisk-ami-0.1.6.tar.gz", hash = "sha256:c682089f104e30427a411fc05ca8b61044c27e2e4aa8970aa424230e5d9f412c"},
+    {file = "asterisk-ami-0.1.7.tar.gz", hash = "sha256:de954116b7b03fb1b5420d9d83d847a3ba0d4cf1449847eada88b4bfde080136"},
+    {file = "asterisk_ami-0.1.7-py3-none-any.whl", hash = "sha256:b94baabc1107214f3369a804fd1efda0649ba6afcb21095c6b438b6245fef7ff"},
 ]
+
+[package.extras]
+tests = ["coverage", "rx"]
 
 [[package]]
 name = "attrs"
@@ -263,4 +267,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "=3.12.1"
-content-hash = "c1f66f04e28695b92ebd46b4a57db01aca018521774099b9d0d9e59055082366"
+content-hash = "dca7809a4d2a0a55e41e8bb8a952ec203023e7a36a0877b538dc30f680745a46"
