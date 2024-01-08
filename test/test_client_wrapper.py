@@ -127,9 +127,8 @@ class TestClientWrapper(unittest.TestCase):
 
         self.__ami_client.login_response = FutureResponseMock(
             ResponseMock("Error", False))
-        self.assertRaisesRegex(
-            Exception,
-            "Unable to login AMI client",
+        self.assertRaises(
+            SystemExit,
             self.__client.login,
             "",
             "",

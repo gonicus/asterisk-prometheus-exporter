@@ -29,8 +29,7 @@ def __reconnect(ami_client: ClientWrapper) -> None:
 
 def __restart_event_thread(ami_client: ClientWrapper) -> None:
     """Logs an error and restarts the connection to the AMI."""
-    logging.error(
-        "Event thread ended unexpectedly. Trying to restart connection")
+    logging.error("Event thread ended unexpectedly. Trying to restart connection")
     __reconnect(ami_client)
 
 

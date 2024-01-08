@@ -13,6 +13,7 @@ class EventMock():
 @dataclass
 class ResponseMock():
     status: str
+    keys: Dict[str, str]
 
 
 @dataclass
@@ -134,7 +135,7 @@ class TestActionExecuter(unittest.TestCase):
     def test__send_action(self) -> None:
         # Test general AMI error
         self.__client_mock.send_action_result = FutureResponseMock(
-            ResponseMock("error"))
+            ResponseMock("error", {"Message": "Some error"}))
         result = self.__ae._ActionExecuter__send_action()
         self.assertFalse(result, "Expected result to be false")
 
@@ -145,7 +146,7 @@ class TestActionExecuter(unittest.TestCase):
 
         # Test successful action
         self.__client_mock.send_action_result = FutureResponseMock(
-            ResponseMock("Success"))
+            ResponseMock("Success", {"Message": "Success"}))
         result = self.__ae._ActionExecuter__send_action()
         self.assertTrue(result, "Expected result to be true")
 

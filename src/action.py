@@ -65,8 +65,8 @@ class ActionExecuter():
                 f"Action '{self.__action.name}': Did not receive response after {self.__action.response_timeout}s")
             return False
         if future.response.status != "Success":
-            logging.error(
-                f"Unable to fetch {self.__action.name}: action response: {str(future.response)}")
+            msg = str(future.response.keys.get("Message", future.response))
+            logging.error(f"Unable to fetch {self.__action.name}: action response: {msg}")
             return False
 
         return True
