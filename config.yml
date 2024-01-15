@@ -9,9 +9,9 @@ ami_client:
 general:
   log_level: "INFO"
   login_validation_timeout: 10
+  fully_booted_validation_timeout: 60
   response_timeout: 10
   ping_timeout: 20
-
 
 # Default settings
 default:

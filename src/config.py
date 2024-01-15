@@ -134,6 +134,7 @@ class __AMIClientConfig():
 class __GeneralConfig():
     log_level: str = "INFO"
     login_validation_timeout: int = 10
+    fully_booted_validation_timeout: int = 60
     response_timeout: int = 10
     ping_timeout: int = 120
 
@@ -142,6 +143,8 @@ class __GeneralConfig():
         self.log_level = config.get("log_level", self.log_level)
         self.login_validation_timeout = config.get(
             "login_validation_timeout", self.login_validation_timeout)
+        self.fully_booted_validation_timeout = config.get(
+            "fully_booted_validation_timeout", self.fully_booted_validation_timeout)
         self.response_timeout = config.get(
             "response_timeout", self.response_timeout)
         self.ping_timeout = config.get("ping_timeout", self.ping_timeout)

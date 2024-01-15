@@ -3,9 +3,10 @@ import argparse
 import logging
 from time import sleep
 from client_wrapper import ClientWrapper
-from prometheus_client import start_http_server
+from prometheus_client import start_http_server, Info
 import config
 from action import ActionExecuter
+from version import __version__
 
 
 def __login(ami_client: ClientWrapper) -> None:
@@ -13,7 +14,8 @@ def __login(ami_client: ClientWrapper) -> None:
     ami_client.login(
         config.ami_client_config.username,
         config.ami_client_config.secret,
-        config.general_config.login_validation_timeout)
+        config.general_config.login_validation_timeout,
+        config.general_config.fully_booted_validation_timeout)
 
 
 def __shutdown(ami_client: ClientWrapper) -> None:
@@ -29,8 +31,7 @@ def __reconnect(ami_client: ClientWrapper) -> None:
 
 def __restart_event_thread(ami_client: ClientWrapper) -> None:
     """Logs an error and restarts the connection to the AMI."""
-    logging.error(
-        "Event thread ended unexpectedly. Trying to restart connection")
+    logging.error("Event thread ended unexpectedly. Trying to restart connection")
     __reconnect(ami_client)
 
 
@@ -38,6 +39,11 @@ def __restart_connection(ami_client: ClientWrapper) -> None:
     """Logs an error and restarts the connection to the AMI."""
     logging.error("Connection to the AMI lost. Trying to restart connection")
     __reconnect(ami_client)
+
+
+def __init_version_metric() -> None:
+    i = Info('version', 'Version of the asterisk-prometheus-exporter')
+    i.info({'version': __version__})
 
 
 def __scrape(client: ClientWrapper):
@@ -103,6 +109,7 @@ async def __main() -> None:
     __login(ami_client)
     start_http_server(args.port)
     logging.info(f"Started server on port {args.port}")
+    __init_version_metric()
     __scrape(ami_client)
 
 
