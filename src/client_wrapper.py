@@ -18,6 +18,7 @@ class ClientWrapper:
             address=address, port=port, timeout=timeout)
         self.__event_listener: EventListener = EventListener()
         self.__is_login_validated: bool = False
+        self.__is_asterisk_fully_booted: bool = False
 
         self.__wait_sequence_timeout = 0.02
 
@@ -39,6 +40,15 @@ class ClientWrapper:
             self.__client.remove_event_listener(self.__validate_login)
             logging.info("Validated AMI client login")
 
+    def __validate_asterisk_fully_booted(self, event: Event, **kwargs) -> None:
+        """Event callback used during login to wait for the FullyBooted event."""
+        if event.name is None:
+            return
+        if event.name == "FullyBooted":
+            self.__is_asterisk_fully_booted = True
+            self.__client.remove_event_listener(self.__validate_asterisk_fully_booted)
+            logging.info("Validated Asterisk is fully booted")
+
     def __validate_ami_connection(self) -> bool:
         """Sends a test action to the AMI to make sure the connection is still up.
 
@@ -56,10 +66,13 @@ class ClientWrapper:
         self.__event_listener.update_time_of_last_event()
         return True
 
-    def login(self, username: str, secret: str, timeout: int) -> None:
-        """Connects to the AMI as a client, sends a login action with the given credentials and validates the
-        login by waiting for the SuccessfulAuth event. Returns after the login is validated."""
+    def login(self, username: str, secret: str, login_timeout: int, fully_booted_timeout: int) -> None:
+        """Connects to the AMI as a client and sends a login action with the given credentials.
+        Validates the login by waiting for the SuccessfulAuth event and validates that the Asterisk is fully booted
+        by waiting for the FullyBooted event.
+        Returns after both events are validated."""
         self.__client.add_event_listener(self.__validate_login)
+        self.__client.add_event_listener(self.__validate_asterisk_fully_booted)
         self.__client.add_event_listener(self.__event_listener.on_event)
 
         logging.debug(f"Connecting to AMI: {self.__client._address}:{self.__client._port}")
@@ -78,13 +91,18 @@ class ClientWrapper:
             msg = str(future.response.keys.get('Message', future.response))
             self.__raise_critical(f"Unable to login AMI client: {msg}")
 
-        # Validate successful login by waiting for the __validate_login
-        # function to collect the SuccessfulAuth event.
+        # - Validate successful login by waiting for the __validate_login function to collect the SuccessfulAuth event
+        # - Validate that Asterisk is fully booted by waiting for the __validate_asterisk_fully_booted
+        #   function to collect the FullyBooted event.
         start_time = time()
-        while self.__is_login_validated is False:
-            if time() > start_time + timeout:
+        while self.__is_login_validated is False or self.__is_asterisk_fully_booted is False:
+            if not self.__is_login_validated and time() > start_time + login_timeout:
                 self.__raise_critical(
-                    f"Unable to login AMI client: reached timeout of {timeout}s when validating login")
+                    f"Unable to login AMI client: reached timeout of {login_timeout}s when validating login")
+            if not self.__is_asterisk_fully_booted and time() > start_time + fully_booted_timeout:
+                self.__raise_critical(f"Unable to login AMI client: reached timeout of {fully_booted_timeout}s when "
+                                      "validating that Asterisk is fully booted")
+
             sleep(self.__wait_sequence_timeout)
 
     def logoff(self) -> None:

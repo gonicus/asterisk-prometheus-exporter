@@ -123,7 +123,7 @@ class TestClientWrapper(unittest.TestCase):
     def test_login(self):
         self.__ami_client.login_response = FutureResponseMock(
             ResponseMock("Error", True))
-        self.assertRaises(Exception, self.__client.login, "", "", 1)
+        self.assertRaises(Exception, self.__client.login, "", "", 1, 1)
 
         self.__ami_client.login_response = FutureResponseMock(
             ResponseMock("Error", False))
@@ -132,12 +132,14 @@ class TestClientWrapper(unittest.TestCase):
             self.__client.login,
             "",
             "",
-            0.01)
+            0,
+            0)
 
         self.__ami_client.login_response = FutureResponseMock(
             ResponseMock("Success", False))
         self.__client._ClientWrapper__is_login_validated = True
-        self.__client.login("<username>", "<secret>", 0)
+        self.__client._ClientWrapper__is_asterisk_fully_booted = True
+        self.__client.login("<username>", "<secret>", 0, 0)
 
         self.assertEqual(self.__ami_client.logged_in_username, "<username>")
         self.assertEqual(self.__ami_client.logged_in_secret, "<secret>")
