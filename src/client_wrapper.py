@@ -1,4 +1,5 @@
 import logging
+import socket
 from time import sleep, time
 from typing import List, Any
 from asterisk.ami import AMIClient, SimpleAction, Event, FutureResponse
@@ -28,7 +29,7 @@ class ClientWrapper:
 
         :param str message: Message that is logged and used within the exception."""
         logging.critical(msg)
-        raise Exception(msg)
+        exit(1)
 
     def __validate_login(self, event: Event, **kwargs) -> None:
         """Event callback used during login to wait for the SuccessfulAuth event."""
@@ -59,8 +60,7 @@ class ClientWrapper:
 
         future = self.__client.send_action(action)
         if future.response is None:
-            logging.error(
-                f"Did not receive response after {str(self.__client._timeout)}s")
+            logging.error(f"Did not receive response after {str(self.__client._timeout)}s")
             return False
 
         self.__event_listener.update_time_of_last_event()
@@ -77,7 +77,10 @@ class ClientWrapper:
 
         logging.debug(f"Connecting to AMI: {self.__client._address}:{self.__client._port}")
 
-        self.__client.connect()
+        try:
+            self.__client.connect()
+        except socket.error as e:
+            self.__raise_critical(f"Unable to connect to {self.__client._address}:{self.__client._port}, error: {e}")
 
         # Prevent socket from closing if no events are sent by the AMI. We are validating the
         # AMI connection using the custom EventListener.
@@ -85,7 +88,8 @@ class ClientWrapper:
 
         future = self.__client.login(username, secret)
         if future.response.is_error():
-            self.__raise_critical(str(future.response))
+            msg = str(future.response.keys.get('Message', future.response))
+            self.__raise_critical(f"Unable to login AMI client: {msg}")
 
         # - Validate successful login by waiting for the __validate_login function to collect the SuccessfulAuth event
         # - Validate that Asterisk is fully booted by waiting for the __validate_asterisk_fully_booted
