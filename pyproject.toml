@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asterisk-prometheus-exporter"
-version = "1.0.0"
+version = "1.1.0"
 description = "Prometheus exporter for Asterisk using the Asterisk Manager Interface (AMI)"
 authors = ["GONICUS GmbH"]
 readme = "README.md"
