@@ -240,7 +240,7 @@ $def:
       type:
         type: string
         description: Sets the type of metric.
-        enum: counter
+        enum: [counter]
       increment_value:
         type: string
         description: |
@@ -261,7 +261,7 @@ $def:
       type:
         type: string
         description: Sets the type of metric.
-        enum: gauge
+        enum: [gauge]
       set_value:
         type: string
         description: |
