@@ -1,4 +1,8 @@
 # asterisk-prometheus-exporter Changelog
+## v1.1.1 - 2026-09-14
+### Fixed
+- Fix invalid config schema [#19](https://github.com/gonicus/asterisk-prometheus-exporter/pull/19)
+
 ## v1.1.0 - 2024-01-15
 ### Added
 - Add metric `version_info` showing the version of the exporter [#12](https://github.com/gonicus/asterisk-prometheus-exporter/pull/12)
