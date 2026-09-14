@@ -207,11 +207,6 @@ scrape_config = __ScrapeConfig()
 def load_from_file(path: str) -> None:
     """Loads the specified file. The specified file must match the config_schema.yml,
     otherwise an exception is thrown."""
-    global ami_client_config
-    global default_config
-    global filter_config
-    global scrape_config
-
     with open(Path(__file__).resolve().parent / "config_schema.yml", "r") as stream:
         schema = yaml.safe_load(stream)
 
